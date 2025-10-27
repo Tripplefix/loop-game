@@ -1,9 +1,11 @@
+import { PieceType } from './constants/enums';
+
 export interface GameConfig {
     rows: number;
     cols: number;
     bg: string;
     color: string;
-    board: number[];
+    board: PieceType[];
 }
 
 export interface Connectors {

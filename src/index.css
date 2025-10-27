@@ -1,3 +1,10 @@
+:root {
+  --game-bg: #ffffff;
+  --game-color: #000000;
+  --square-size: 50px;
+  --animation-speed: 0.2s;
+}
+
 body {
   font: 30px "Century Gothic", Futura, sans-serif;
   margin: 0;
@@ -29,7 +36,7 @@ ol, ul {
   height: 100%;
   align-content: center;
 
-  transition: all .1s ease-in;
+  transition: all var(--animation-speed) ease-in;
 }
 
 .game-board {
@@ -47,15 +54,16 @@ ol, ul {
   border: none;
   float: left;
   font-weight: bold;
-  line-height: 50px;
+  line-height: var(--square-size);
   padding: 0;
   text-align: center;
-  width: 50px;
-  height: 50px;
+  width: var(--square-size);
+  height: var(--square-size);
   color: inherit;
   overflow: hidden;
+  position: relative;
 
-  transition: all .2s;
+  transition: transform var(--animation-speed) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .square .svg{

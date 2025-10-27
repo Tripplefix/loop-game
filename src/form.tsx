@@ -1,5 +1,7 @@
 import { ReactElement } from "react";
 import { Connectors } from "./types";
+import { PieceType } from "./constants/enums";
+import { ROTATION_STEP } from "./constants";
 
 import Line from './components/line';
 import Curve from './components/curve';
@@ -8,15 +10,15 @@ import Endian from './components/endian';
 import Cross from './components/cross';
 
 export default class Form {
-    type: number;
+    type: PieceType;
     rotation: number;
     solved: boolean;
     connectors!: Connectors;
 
-    constructor(type: number) {
+    constructor(type: PieceType) {
         this.type = type;
         this.rotation = 0;
-        this.solved = type === 1; // type 1 is an empty square thus always solved
+        this.solved = type === PieceType.EMPTY; // EMPTY square is always solved
 
         this._setConnectors();
 
@@ -27,18 +29,18 @@ export default class Form {
 
     get figure(): ReactElement | string {
         switch (this.type) {
-            case 2: return <Endian />;
-            case 3: return <Curve />;
-            case 4: return <Line />;
-            case 5: return <Fork />;
-            case 6: return <Cross />;
-            case 1:
+            case PieceType.ENDIAN: return <Endian />;
+            case PieceType.CURVE: return <Curve />;
+            case PieceType.LINE: return <Line />;
+            case PieceType.FORK: return <Fork />;
+            case PieceType.CROSS: return <Cross />;
+            case PieceType.EMPTY:
             default: return "";
-        }
+        } 
     }
 
     rotate(): void {
-        this.rotation += 90;
+        this.rotation += ROTATION_STEP;
 
         const connectors: Connectors = { ...this.connectors };
 
@@ -52,10 +54,10 @@ export default class Form {
 
     private _setConnectors(): void {
         this.connectors = {
-            top: [2, 4, 5, 6].includes(this.type),
-            right: [5, 6].includes(this.type),
-            bottom: [3, 4, 6].includes(this.type),
-            left: [3, 5, 6].includes(this.type),
+            top: [PieceType.ENDIAN, PieceType.LINE, PieceType.FORK, PieceType.CROSS].includes(this.type),
+            right: [PieceType.FORK, PieceType.CROSS].includes(this.type),
+            bottom: [PieceType.CURVE, PieceType.LINE, PieceType.CROSS].includes(this.type),
+            left: [PieceType.CURVE, PieceType.FORK, PieceType.CROSS].includes(this.type),
         };
     }
 }
