@@ -1,12 +1,12 @@
-import { CSSProperties } from 'react';
-import Form from '../../models/Piece';
+import { CSSProperties, memo } from 'react';
+import Piece from '../../models/Piece';
 
 interface SquareProps {
-    form: Form;
+    form: Piece;
     onClick: () => void;
 }
 
-export function Square({ form, onClick }: SquareProps) {
+export const Square = memo(({ form, onClick }: SquareProps) => {
     const squareRotation: CSSProperties = {
         transform: `rotate(${form.rotation}deg)`,
         willChange: 'transform',
@@ -21,4 +21,9 @@ export function Square({ form, onClick }: SquareProps) {
             {form.figure}
         </button>
     );
-}
+}, (prev, next) => {
+    // Custom comparison: only re-render if piece actually changed
+    return prev.form.equals(next.form);
+});
+
+Square.displayName = 'Square';

@@ -1,9 +1,9 @@
 import { CSSProperties } from 'react';
-import Form from '../../models/Piece';
+import Piece from '../../models/Piece';
 import { Square } from './Square';
 
 interface BoardProps {
-    squares: Form[];
+    squares: Piece[];
     onClick: (index: number) => void;
     cols: number;
     rows: number;

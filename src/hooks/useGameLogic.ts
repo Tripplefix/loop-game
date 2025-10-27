@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameConfig } from '../types';
-import Form from '../models/Piece';
+import Piece from '../models/Piece';
 import { PieceType } from '../constants/enums';
 import Utilities from '../utils/gameUtilities';
 
 export function useGameLogic() {
     const [level, setLevel] = useState(0);
     const [solved, setSolved] = useState(false);
-    const [squares, setSquares] = useState<Form[] | null>(null);
+    const [squares, setSquares] = useState<Piece[] | null>(null);
     const [game, setGame] = useState<GameConfig | null>(null);
     const [statusText, setStatusText] = useState("");
 
@@ -16,18 +16,18 @@ export function useGameLogic() {
         metaThemeColor?.setAttribute("content", color);
     }, []);
 
-    const updateSolved = useCallback((colCount: number, squares: Form[], i: number): void => {
-        if (squares[i] === undefined || squares[i].type === PieceType.EMPTY) return;
+    const updateSolved = useCallback((colCount: number, squares: Piece[], i: number): Piece[] => {
+        if (squares[i] === undefined || squares[i].type === PieceType.EMPTY) return squares;
 
         // we assume solved and set false later if that is not the case
-        squares[i].solved = true;
+        let isSolved = true;
 
         // compare top
         if (squares[i].connectors.top) {
             if (!squares[i - colCount] ||
                 squares[i - colCount].type === PieceType.EMPTY ||
                 !squares[i - colCount].connectors.bottom)
-                squares[i].solved = false;
+                isSolved = false;
         }
 
         // compare right
@@ -35,7 +35,7 @@ export function useGameLogic() {
             if (!squares[i + 1] ||
                 squares[i + 1].type === PieceType.EMPTY ||
                 !squares[i + 1].connectors.left)
-                squares[i].solved = false;
+                isSolved = false;
         }
 
         // compare bottom
@@ -43,7 +43,7 @@ export function useGameLogic() {
             if (!squares[i + colCount] ||
                 squares[i + colCount].type === PieceType.EMPTY ||
                 !squares[i + colCount].connectors.top)
-                squares[i].solved = false;
+                isSolved = false;
         }
 
         // compare left
@@ -51,11 +51,16 @@ export function useGameLogic() {
             if (!squares[i - 1] ||
                 squares[i - 1].type === PieceType.EMPTY ||
                 !squares[i - 1].connectors.right)
-                squares[i].solved = false;
+                isSolved = false;
         }
+
+        // Return new array with updated piece
+        const newSquares = [...squares];
+        newSquares[i] = squares[i].setSolved(isSolved);
+        return newSquares;
     }, []);
 
-    const calculateSolved = useCallback((squares: Form[]): boolean => {
+    const calculateSolved = useCallback((squares: Piece[]): boolean => {
         const solvedList = squares.map((square) => square.solved);
         return !solvedList.includes(false);
     }, []);
@@ -63,17 +68,19 @@ export function useGameLogic() {
     const handleClick = useCallback((i: number): void => {
         if (solved || !squares || !game) return;
 
-        const newSquares = squares.slice();
-        newSquares[i].rotate();
+        let newSquares = squares.slice();
+        
+        // Rotate the clicked piece (immutable)
+        newSquares[i] = newSquares[i].rotate();
 
         const cols = game.cols;
 
-        // we need to update not only the current square but also the adjacent ones
-        updateSolved(cols, newSquares, i); // current square
-        updateSolved(cols, newSquares, i + 1); // right neighbour
-        updateSolved(cols, newSquares, i - 1); // left neighbour
-        updateSolved(cols, newSquares, i - cols); // top neighbour
-        updateSolved(cols, newSquares, i + cols); // bottom neighbour
+        // Update solved status for current and adjacent pieces
+        newSquares = updateSolved(cols, newSquares, i); // current square
+        newSquares = updateSolved(cols, newSquares, i + 1); // right neighbour
+        newSquares = updateSolved(cols, newSquares, i - 1); // left neighbour
+        newSquares = updateSolved(cols, newSquares, i - cols); // top neighbour
+        newSquares = updateSolved(cols, newSquares, i + cols); // bottom neighbour
 
         setSquares(newSquares);
 
@@ -97,10 +104,12 @@ export function useGameLogic() {
 
         changeThemeColor(newGame.bg);
 
-        const newSquares = newGame.board.map((type) => new Form(type));
+        // Use Piece.create() factory method for random rotation
+        let newSquares = newGame.board.map((type) => Piece.create(type));
 
+        // Update solved status for all pieces
         for (let i = 0; i < newSquares.length; i++) {
-            updateSolved(newGame.cols, newSquares, i);
+            newSquares = updateSolved(newGame.cols, newSquares, i);
         }
 
         setGame(newGame);

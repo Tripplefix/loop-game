@@ -9,24 +9,31 @@ import Fork from '../components/shapes/fork';
 import Endian from '../components/shapes/endian';
 import Cross from '../components/shapes/cross';
 
-export default class Form {
-    type: PieceType;
-    rotation: number;
-    solved: boolean;
-    connectors!: Connectors;
+export default class Piece {
+    public readonly type: PieceType;
+    public readonly rotation: number;
+    public readonly solved: boolean;
 
-    constructor(type: PieceType) {
+    constructor(type: PieceType, rotation: number = 0, solved: boolean = false) {
         this.type = type;
-        this.rotation = 0;
-        this.solved = type === PieceType.EMPTY; // EMPTY square is always solved
-
-        this._setConnectors();
-
-        for (let i = 0; i <= Math.floor(Math.random() * 3); i++) {
-            this.rotate();
-        }
+        // Normalize rotation to 0-270
+        this.rotation = rotation % 360;
+        this.solved = type === PieceType.EMPTY ? true : solved;
     }
 
+    /**
+     * Factory method to create a new piece with random rotation
+     */
+    static create(type: PieceType): Piece {
+        const piece = new Piece(type);
+        // Random initial rotation
+        const rotations = Math.floor(Math.random() * 4);
+        return rotations === 0 ? piece : piece.rotateBy(rotations * ROTATION_STEP);
+    }
+
+    /**
+     * Get the visual representation of the piece
+     */
     get figure(): ReactElement | string {
         switch (this.type) {
             case PieceType.ENDIAN: return <Endian />;
@@ -39,25 +46,72 @@ export default class Form {
         } 
     }
 
-    rotate(): void {
-        this.rotation += ROTATION_STEP;
-
-        const connectors: Connectors = { ...this.connectors };
-
-        connectors.top = this.connectors.left;
-        connectors.right = this.connectors.top;
-        connectors.bottom = this.connectors.right;
-        connectors.left = this.connectors.bottom;
-
-        this.connectors = connectors;
+    /**
+     * Get the connectors based on current rotation
+     */
+    get connectors(): Connectors {
+        const base = this.getBaseConnectors();
+        return this.rotateConnectors(base);
     }
 
-    private _setConnectors(): void {
-        this.connectors = {
+    /**
+     * Returns a new Piece rotated by 90 degrees
+     */
+    rotate(): Piece {
+        return new Piece(this.type, this.rotation + ROTATION_STEP, this.solved);
+    }
+
+    /**
+     * Returns a new Piece rotated by specified degrees
+     */
+    rotateBy(degrees: number): Piece {
+        return new Piece(this.type, this.rotation + degrees, this.solved);
+    }
+
+    /**
+     * Returns a new Piece with updated solved status
+     */
+    setSolved(isSolved: boolean): Piece {
+        return new Piece(this.type, this.rotation, isSolved);
+    }
+
+    /**
+     * Check if two pieces are equal
+     */
+    equals(other: Piece): boolean {
+        return this.type === other.type &&
+               this.rotation === other.rotation &&
+               this.solved === other.solved;
+    }
+
+    /**
+     * Get base connectors for piece type (before rotation)
+     */
+    private getBaseConnectors(): Connectors {
+        return {
             top: [PieceType.ENDIAN, PieceType.LINE, PieceType.FORK, PieceType.CROSS].includes(this.type),
             right: [PieceType.FORK, PieceType.CROSS].includes(this.type),
             bottom: [PieceType.CURVE, PieceType.LINE, PieceType.CROSS].includes(this.type),
             left: [PieceType.CURVE, PieceType.FORK, PieceType.CROSS].includes(this.type),
         };
+    }
+
+    /**
+     * Rotate connectors based on current rotation
+     */
+    private rotateConnectors(connectors: Connectors): Connectors {
+        const rotations = (this.rotation / ROTATION_STEP) % 4;
+        let result = { ...connectors };
+        
+        for (let i = 0; i < rotations; i++) {
+            result = {
+                top: result.left,
+                right: result.top,
+                bottom: result.right,
+                left: result.bottom,
+            };
+        }
+        
+        return result;
     }
 }
