@@ -1,13 +1,13 @@
 import { ReactElement } from "react";
-import { Connectors } from "./types";
-import { PieceType } from "./constants/enums";
-import { ROTATION_STEP } from "./constants";
+import { Connectors } from "../types";
+import { PieceType } from "../constants/enums";
+import { ROTATION_STEP } from "../constants";
 
-import Line from './components/line';
-import Curve from './components/curve';
-import Fork from './components/fork';
-import Endian from './components/endian';
-import Cross from './components/cross';
+import Line from '../components/shapes/line';
+import Curve from '../components/shapes/curve';
+import Fork from '../components/shapes/fork';
+import Endian from '../components/shapes/endian';
+import Cross from '../components/shapes/cross';
 
 export default class Form {
     type: PieceType;

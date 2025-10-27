@@ -1,5 +1,5 @@
-import { GameConfig } from './types';
-import { PieceType } from './constants/enums';
+import { GameConfig } from '../types';
+import { PieceType } from './enums';
 
 export const game1: GameConfig = {
     rows: 2,

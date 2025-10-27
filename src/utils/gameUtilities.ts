@@ -1,7 +1,7 @@
-import { game1, game2, game3, game4, game5 } from './games';
-import { GameConfig } from './types';
-import { getRandomMessage } from './constants/messages';
-import { MAX_STATIC_LEVELS } from './constants';
+import { game1, game2, game3, game4, game5 } from '../constants/games';
+import { GameConfig } from '../types';
+import { getRandomMessage } from '../constants/messages';
+import { MAX_STATIC_LEVELS } from '../constants';
 
 const _staticLevels: GameConfig[] = [game1, game2, game3, game4, game5];
 
