@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function Endian() {
     return (
         <svg viewBox="0 0 168.000000 168.000000">

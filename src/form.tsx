@@ -1,14 +1,19 @@
-import React from "react";
+import { ReactElement } from "react";
+import { Connectors } from "./types";
 
 import Line from './components/line';
 import Curve from './components/curve';
 import Fork from './components/fork';
-import Endian from './components/endian'
+import Endian from './components/endian';
 import Cross from './components/cross';
 
 export default class Form {
-    constructor(type) {
+    type: number;
+    rotation: number;
+    solved: boolean;
+    connectors!: Connectors;
 
+    constructor(type: number) {
         this.type = type;
         this.rotation = 0;
         this.solved = type === 1; // type 1 is an empty square thus always solved
@@ -20,22 +25,22 @@ export default class Form {
         }
     }
 
-    get figure(){
-        switch(this.type){
-            case 2: return ( <Endian /> );
-            case 3: return ( <Curve /> );
-            case 4: return ( <Line /> );
-            case 5: return ( <Fork /> );
-            case 6: return ( <Cross /> );
+    get figure(): ReactElement | string {
+        switch (this.type) {
+            case 2: return <Endian />;
+            case 3: return <Curve />;
+            case 4: return <Line />;
+            case 5: return <Fork />;
+            case 6: return <Cross />;
             case 1:
             default: return "";
         }
     }
 
-    rotate() {
+    rotate(): void {
         this.rotation += 90;
 
-        const connectors = { ...this.connectors };
+        const connectors: Connectors = { ...this.connectors };
 
         connectors.top = this.connectors.left;
         connectors.right = this.connectors.top;
@@ -45,12 +50,12 @@ export default class Form {
         this.connectors = connectors;
     }
 
-    _setConnectors(){
+    private _setConnectors(): void {
         this.connectors = {
             top: [2, 4, 5, 6].includes(this.type),
-            right: [5,6].includes(this.type),
-            bottom: [3,4,6].includes(this.type),
-            left: [3,5,6].includes(this.type),
+            right: [5, 6].includes(this.type),
+            bottom: [3, 4, 6].includes(this.type),
+            left: [3, 5, 6].includes(this.type),
         };
     }
 }
